@@ -20,6 +20,12 @@ To build the extension, and rebuild it when the files are changed, run
 $ npm start
 ```
 
+To build the extension run the following command
+
+```
+npm run build
+```
+
 After the project has been built, a directory named `dist` has been created. You have to add this directory to your Chrome browser:
 
 1. Open Chrome.
