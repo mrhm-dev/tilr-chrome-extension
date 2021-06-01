@@ -7,7 +7,7 @@ import Heading from './ui/Heading';
 import TextLabel from './ui/TextLabel';
 import TextInput from './ui/TextInput';
 import Button from './ui/Button';
-import logo from '../images/logo.png';
+import logo from '../images/tilr_logo.svg';
 
 const Container = styled.div`
 	display: flex;
