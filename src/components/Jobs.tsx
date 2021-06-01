@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Axios from 'axios';
 import config from '../config';
 import { Table, TBody, TD, TH, THead, TR } from './ui/Table';
+import Button from './ui/Button';
 
 const Container = styled.div`
 	width: 100%;
@@ -20,7 +21,24 @@ interface JobsProps {
 
 const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 	const [jobs, setJobs] = React.useState([]);
+	const [text, setText] = React.useState('Communication');
+	const [name, setName] = React.useState('Guest');
 	const [responseError, setResponseError] = React.useState('');
+
+	React.useEffect(() => {
+		chrome.tabs.query(
+			{ active: true, currentWindow: true },
+			(tabs: any) => {
+				chrome.tabs.sendMessage(
+					tabs[0].id,
+					{ type: 'get_name' },
+					(response) => {
+						setName(response.name);
+					}
+				);
+			}
+		);
+	}, []);
 
 	React.useEffect(() => {
 		const baseURL =
@@ -29,14 +47,13 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 				: config.devEndpoint;
 
 		const URL = `${baseURL}/client/${clientId}/jobsFromText`;
-		console.log('URL', URL);
 
 		// TODO: verify token later
 		const token = localStorage.getItem('aujwt');
 		console.log('token from jobs page', token);
 		Axios.post(
 			URL,
-			{ text: 'Communications' },
+			{ text },
 			{
 				headers: {
 					authorization: `Bearer ${token}`,
@@ -52,7 +69,7 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 				console.log(e.response);
 				setResponseError(e.response.data.message);
 			});
-	}, []);
+	}, [text, name]);
 
 	const formatDate = (dateStr: string) => {
 		const date = new Date(dateStr);
@@ -61,6 +78,29 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 
 	return (
 		<Container>
+			<div style={{ textAlign: 'center', padding: '0.5rem' }}>
+				<Button
+					onClick={() => {
+						chrome.tabs.query(
+							{ active: true, currentWindow: true },
+							(tabs: any) => {
+								chrome.tabs.sendMessage(
+									tabs[0].id,
+									{
+										type: 'get_html',
+									},
+									(response) => {
+										console.log('Response', response);
+										setText(response.text);
+									}
+								);
+							}
+						);
+					}}
+				>
+					See how {name} matches to your job{' '}
+				</Button>
+			</div>
 			<Table>
 				<THead>
 					<TR>

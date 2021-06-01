@@ -24,6 +24,7 @@ const Container = styled.div`
 const App = () => {
 	const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 	const [clientId, setClientId] = React.useState('');
+	const [isLinkedin, setIsLinkedin] = React.useState(false);
 
 	React.useEffect(() => {
 		const token = localStorage.getItem('aujwt');
@@ -36,6 +37,19 @@ const App = () => {
 			}
 		}
 	}, [isLoggedIn, setIsLoggedIn]);
+
+	React.useEffect(() => {
+		chrome.tabs.query(
+			{ active: true, currentWindow: true },
+			(tabs: any) => {
+				if (!tabs[0].url.includes('https://www.linkedin.com/in')) {
+					setIsLinkedin(false);
+				} else {
+					setIsLinkedin(true);
+				}
+			}
+		);
+	}, []);
 
 	const validateToken = (token: string) => {
 		if (!token) {
@@ -60,10 +74,20 @@ const App = () => {
 
 	return (
 		<Container>
-			{isLoggedIn && clientId ? (
-				<Jobs clientId={clientId} />
+			{isLinkedin ? (
+				<>
+					{isLoggedIn && clientId ? (
+						<Jobs clientId={clientId} />
+					) : (
+						<Login onSuccess={handleOnSuccess} />
+					)}
+				</>
 			) : (
-				<Login onSuccess={handleOnSuccess} />
+				<>
+					<p>
+						This extension will only work on Linkedin Profile Page
+					</p>
+				</>
 			)}
 		</Container>
 	);
