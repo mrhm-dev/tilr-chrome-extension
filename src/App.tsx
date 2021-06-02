@@ -3,11 +3,10 @@ import jwt_decode from 'jwt-decode';
 
 import './App.css';
 
-import axios from 'axios';
-
 import styled from 'styled-components';
 import Login from './components/Login';
 import Jobs from './components/Jobs';
+import { Error, ErrorText } from './components/ui/Error';
 
 const Container = styled.div`
 	min-width: 600px;
@@ -20,6 +19,21 @@ const Container = styled.div`
 	font-weight: 400;
 	color: #333333;
 `;
+
+interface IJwt {
+	userId: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	profileImage: string;
+	iat: number;
+	exp: number;
+}
+
+interface IValid {
+	clientId: string;
+	isValid: boolean;
+}
 
 const App = () => {
 	const [isLoggedIn, setIsLoggedIn] = React.useState(false);
@@ -34,6 +48,9 @@ const App = () => {
 			if (isValid) {
 				setIsLoggedIn(true);
 				setClientId(clientId);
+			} else {
+				setIsLoggedIn(false);
+				setClientId('');
 			}
 		}
 	}, [isLoggedIn, setIsLoggedIn]);
@@ -51,20 +68,26 @@ const App = () => {
 		);
 	}, []);
 
-	const validateToken = (token: string) => {
+	const validateToken = (token: string): IValid => {
 		if (!token) {
 			return {
 				isValid: false,
-				contentId: '',
+				clientId: '',
 			};
 		}
 
-		const decode: any = jwt_decode(token);
+		const decode: IJwt = jwt_decode(token);
 
 		return {
-			isValid: true,
+			isValid: isExpire(decode.exp),
 			clientId: decode.userId,
 		};
+	};
+
+	const isExpire = (exp: number) => {
+		const expDate = exp * 1000;
+		const now = new Date().getTime();
+		return expDate > now;
 	};
 
 	const handleOnSuccess = (clientId: string) => {
@@ -83,11 +106,11 @@ const App = () => {
 					)}
 				</>
 			) : (
-				<>
-					<p>
+				<Error>
+					<ErrorText>
 						This extension will only work on Linkedin Profile Page
-					</p>
-				</>
+					</ErrorText>
+				</Error>
 			)}
 		</Container>
 	);

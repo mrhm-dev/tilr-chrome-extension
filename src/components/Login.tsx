@@ -5,7 +5,7 @@ import config from '../config';
 import Card from './ui/Card';
 import Heading from './ui/Heading';
 import TextLabel from './ui/TextLabel';
-import TextInput from './ui/TextInput';
+import { TextInput, InvalidInput } from './ui/TextInput';
 import Button from './ui/Button';
 import logo from '../images/tilr_logo.svg';
 
@@ -47,11 +47,16 @@ interface LoginProps {
 	onSuccess: (clientId: string) => void;
 }
 
+interface ILoginField {
+	email?: string;
+	password?: string;
+}
+
 const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 	const [email, setEmail] = React.useState('');
 	const [password, setPassword] = React.useState('');
-	const [error, setError] = React.useState({});
-	const [requestError, setRequestError] = React.useState('');
+	const [error, setError] = React.useState<ILoginField>({});
+	const [responseError, setResponseError] = React.useState('');
 
 	const handleSubmit = () => {
 		console.log(email, password);
@@ -70,11 +75,11 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 					localStorage.setItem('aujwt', data.token);
 					onSuccess(data.userId);
 					setError({});
-					setRequestError('');
+					setResponseError('');
 				})
 				.catch((e) => {
 					console.log('Server Error', e);
-					setRequestError(e.response.data.message);
+					setResponseError(e.response.data.message);
 				});
 		} else {
 			setError(error);
@@ -82,9 +87,28 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 	};
 
 	const validate = (email: String, password: String) => {
+		const error: ILoginField = {};
+
+		if (!email) {
+			error.email = 'Email field can not be empty';
+		} else if (
+			!email.match(
+				/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+			)
+		) {
+			error.email = 'Invalid email format';
+		}
+
+		if (!password) {
+			error.password = 'Password field can not be empty';
+		} else if (password.length < 6) {
+			error.password =
+				'Password must be greater than or equal 6 characters';
+		}
+
 		return {
-			isValid: true,
-			error: {},
+			isValid: Object.keys(error).length === 0,
+			error,
 		};
 	};
 
@@ -104,7 +128,11 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 								value={email}
 								name={email}
 								onChange={(e) => setEmail(e.target.value)}
+								isError={Boolean(error.email)}
 							/>
+							{error.email && (
+								<InvalidInput>{error.email}</InvalidInput>
+							)}
 						</InputGroup>
 						<InputGroup style={{ marginTop: '1rem' }}>
 							<TextLabel>Password</TextLabel>
@@ -113,7 +141,11 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 								value={password}
 								name={password}
 								onChange={(e) => setPassword(e.target.value)}
+								isError={Boolean(error.password)}
 							/>
+							{error.password && (
+								<InvalidInput>{error.password}</InvalidInput>
+							)}
 						</InputGroup>
 						<InputGroup style={{ marginTop: '1.5rem' }}>
 							<Button onClick={() => handleSubmit()}>
@@ -121,6 +153,17 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 							</Button>
 						</InputGroup>
 					</InputHolder>
+					{responseError && (
+						<div
+							style={{
+								textAlign: 'center',
+								padding: '0.5rem',
+								color: 'red',
+							}}
+						>
+							{responseError}
+						</div>
+					)}
 				</Card>
 			</CardHolder>
 		</Container>

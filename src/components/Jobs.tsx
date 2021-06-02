@@ -4,6 +4,7 @@ import Axios from 'axios';
 import config from '../config';
 import { Table, TBody, TD, TH, THead, TR } from './ui/Table';
 import Button from './ui/Button';
+import Meter from './ui/Meter';
 
 const Container = styled.div`
 	width: 100%;
@@ -101,6 +102,17 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 					See how {name} matches to your job{' '}
 				</Button>
 			</div>
+			{responseError && (
+				<div
+					style={{
+						textAlign: 'center',
+						padding: '0.5rem',
+						color: 'red',
+					}}
+				>
+					{responseError}
+				</div>
+			)}
 			<Table>
 				<THead>
 					<TR>
@@ -111,7 +123,7 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 					</TR>
 				</THead>
 				<TBody>
-					{jobs.length > 0 ? (
+					{jobs.length > 0 && (
 						<>
 							{jobs.map((job: any) => (
 								<TR key={job.jobId}>
@@ -123,16 +135,29 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 										{job.location ? job.location : 'N/A'}
 									</TD>
 									<TD>
-										{job.rankText ? job.rankText : job.rank}
+										<Meter
+											rank={job.rank}
+											rankText={job.rankText}
+										/>
 									</TD>
 								</TR>
 							))}
 						</>
-					) : (
-						<p>no jobs found</p>
 					)}
 				</TBody>
 			</Table>
+			{jobs.length === 0 && (
+				<div
+					style={{
+						textAlign: 'center',
+						padding: '1rem',
+						color: '#5046e4',
+						fontSize: '1rem',
+					}}
+				>
+					<p>No Jobs Found</p>
+				</div>
+			)}
 		</Container>
 	);
 };

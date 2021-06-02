@@ -1,10 +1,14 @@
 import styled from 'styled-components';
 
-const TextInput = styled.input`
+interface ITextInput {
+	isError?: boolean;
+}
+
+export const TextInput = styled.input<ITextInput>`
 	width: 100%;
 	padding: 0.5rem 0.25rem;
 	outline: none;
-	border: 1px solid #ddd;
+	border: ${(props) => (props.isError ? '1px solid red' : '1px solid #ddd')};
 	border-radius: 0.25rem;
 	font-size: 16px;
 	&:focus {
@@ -13,4 +17,8 @@ const TextInput = styled.input`
 	}
 `;
 
-export default TextInput;
+export const InvalidInput = styled.p`
+	margin-top: 0.25rem;
+	color: red;
+	font-size: 0.8rem;
+`;
