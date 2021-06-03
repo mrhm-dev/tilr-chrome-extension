@@ -2,12 +2,6 @@
 
 ## Getting started
 
-Create a project based on this boilerplate.
-
-```
-$ npx degit https://github.com/sivertschou/react-typescript-chrome-extension-boilerplate.git#christmas <project-name>
-```
-
 Navigate to the project directory and install the dependencies.
 
 ```
@@ -33,3 +27,5 @@ After the project has been built, a directory named `dist` has been created. You
 3. Enable _Developer mode_.
 4. Click _Load unpacked_.
 5. Select the `dist` directory.
+
+> **Note:** Before publishing the extension, update `src/config.ts` file as follows `environment: 'prod'`
