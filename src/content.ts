@@ -1,10 +1,11 @@
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-	console.log('request', request);
-
+	// response with linkedin profile name
 	if (request.type === 'get_name') {
 		const name = document.querySelector('.text-heading-xlarge');
 		sendResponse({ name: name?.textContent });
 	}
+
+	// response with linkedin profile about, experience, education etc.
 	if (request.type === 'get_html') {
 		const about = document.querySelector(
 			'.pv-profile-section.pv-about-section'
