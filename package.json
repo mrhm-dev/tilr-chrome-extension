@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-react-typescript-boilerplate",
+  "name": "Tilr",
   "version": "1.0.0",
-  "description": "",
+  "description": "tilr is a talent intelligence platform powered to automate the hiring and management process in your organization. We give you the tools to uncover value in your existing talent network, identify skill gaps, and source top candidates in a fraction of the time.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
@@ -36,6 +36,7 @@
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-hot-loader": "^4.13.0",
+    "react-spinners": "^0.11.0",
     "styled-components": "^5.3.0"
   }
 }

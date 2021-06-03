@@ -40,6 +40,7 @@ const App = () => {
 	const [clientId, setClientId] = React.useState('');
 	const [isLinkedin, setIsLinkedin] = React.useState(false);
 
+	// check user is loggedIn or not
 	React.useEffect(() => {
 		const token = localStorage.getItem('aujwt');
 		if (token !== null) {
@@ -55,6 +56,7 @@ const App = () => {
 		}
 	}, [isLoggedIn, setIsLoggedIn]);
 
+	// check the current tab is a linkedin profile or not
 	React.useEffect(() => {
 		chrome.tabs.query(
 			{ active: true, currentWindow: true },
@@ -68,6 +70,7 @@ const App = () => {
 		);
 	}, []);
 
+	// check if the jwt token is valid or not
 	const validateToken = (token: string): IValid => {
 		if (!token) {
 			return {
@@ -84,12 +87,14 @@ const App = () => {
 		};
 	};
 
+	// check expire date is expire or live
 	const isExpire = (exp: number) => {
 		const expDate = exp * 1000;
 		const now = new Date().getTime();
 		return expDate > now;
 	};
 
+	// lift state from login
 	const handleOnSuccess = (clientId: string) => {
 		setClientId(clientId);
 		setIsLoggedIn(true);

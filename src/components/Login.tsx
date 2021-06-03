@@ -8,6 +8,7 @@ import TextLabel from './ui/TextLabel';
 import { TextInput, InvalidInput } from './ui/TextInput';
 import Button from './ui/Button';
 import logo from '../images/tilr_logo.svg';
+import Loading from './ui/Loading';
 
 const Container = styled.div`
 	display: flex;
@@ -55,15 +56,16 @@ interface ILoginField {
 const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 	const [email, setEmail] = React.useState('');
 	const [password, setPassword] = React.useState('');
+	const [isLoading, setIsLoading] = React.useState(false);
 	const [error, setError] = React.useState<ILoginField>({});
 	const [responseError, setResponseError] = React.useState('');
 
+	// login form submit handler
 	const handleSubmit = () => {
-		console.log(email, password);
-
 		const { isValid, error } = validate(email, password);
 
 		if (isValid) {
+			setIsLoading(true);
 			const baseURL =
 				config.environment === 'prod'
 					? config.prodEndpoint
@@ -73,19 +75,23 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 				.then(({ data }) => {
 					console.log('Auth Data', data);
 					localStorage.setItem('aujwt', data.token);
+					// state lifting - pass client id to app.tsx
 					onSuccess(data.userId);
 					setError({});
 					setResponseError('');
+					setIsLoading(false);
 				})
 				.catch((e) => {
 					console.log('Server Error', e);
 					setResponseError(e.response.data.message);
+					setIsLoading(false);
 				});
 		} else {
 			setError(error);
 		}
 	};
 
+	// custom validator function
 	const validate = (email: String, password: String) => {
 		const error: ILoginField = {};
 
@@ -113,60 +119,74 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 	};
 
 	return (
-		<Container>
-			<LogoWrapper>
-				<LogoImage src={logo} />
-			</LogoWrapper>
-			<Heading>Sign in to your account</Heading>
-			<CardHolder>
-				<Card>
-					<InputHolder>
-						<InputGroup>
-							<TextLabel>Email Address</TextLabel>
-							<TextInput
-								type='email'
-								value={email}
-								name={email}
-								onChange={(e) => setEmail(e.target.value)}
-								isError={Boolean(error.email)}
-							/>
-							{error.email && (
-								<InvalidInput>{error.email}</InvalidInput>
+		<>
+			{isLoading ? (
+				<Loading isLoading={isLoading} />
+			) : (
+				<Container>
+					<LogoWrapper>
+						<LogoImage src={logo} />
+					</LogoWrapper>
+					<Heading>Sign in to your account</Heading>
+					<CardHolder>
+						<Card>
+							<InputHolder>
+								<InputGroup>
+									<TextLabel>Email Address</TextLabel>
+									<TextInput
+										type='email'
+										value={email}
+										name={email}
+										onChange={(e) =>
+											setEmail(e.target.value)
+										}
+										isError={Boolean(error.email)}
+									/>
+									{error.email && (
+										<InvalidInput>
+											{error.email}
+										</InvalidInput>
+									)}
+								</InputGroup>
+								<InputGroup style={{ marginTop: '1rem' }}>
+									<TextLabel>Password</TextLabel>
+									<TextInput
+										type='password'
+										value={password}
+										name={password}
+										onChange={(e) =>
+											setPassword(e.target.value)
+										}
+										isError={Boolean(error.password)}
+									/>
+									{error.password && (
+										<InvalidInput>
+											{error.password}
+										</InvalidInput>
+									)}
+								</InputGroup>
+								<InputGroup style={{ marginTop: '1.5rem' }}>
+									<Button onClick={() => handleSubmit()}>
+										Sign in
+									</Button>
+								</InputGroup>
+							</InputHolder>
+							{responseError && (
+								<div
+									style={{
+										textAlign: 'center',
+										padding: '0.5rem',
+										color: 'red',
+									}}
+								>
+									{responseError}
+								</div>
 							)}
-						</InputGroup>
-						<InputGroup style={{ marginTop: '1rem' }}>
-							<TextLabel>Password</TextLabel>
-							<TextInput
-								type='password'
-								value={password}
-								name={password}
-								onChange={(e) => setPassword(e.target.value)}
-								isError={Boolean(error.password)}
-							/>
-							{error.password && (
-								<InvalidInput>{error.password}</InvalidInput>
-							)}
-						</InputGroup>
-						<InputGroup style={{ marginTop: '1.5rem' }}>
-							<Button onClick={() => handleSubmit()}>
-								Sign in
-							</Button>
-						</InputGroup>
-					</InputHolder>
-					{responseError && (
-						<div
-							style={{
-								textAlign: 'center',
-								padding: '0.5rem',
-								color: 'red',
-							}}
-						>
-							{responseError}
-						</div>
-					)}
-				</Card>
-			</CardHolder>
-		</Container>
+						</Card>
+					</CardHolder>
+				</Container>
+			)}
+		</>
 	);
 };
 

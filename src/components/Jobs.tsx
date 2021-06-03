@@ -5,6 +5,7 @@ import config from '../config';
 import { Table, TBody, TD, TH, THead, TR } from './ui/Table';
 import Button from './ui/Button';
 import Meter from './ui/Meter';
+import Loading from './ui/Loading';
 
 const Container = styled.div`
 	width: 100%;
@@ -24,9 +25,11 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 	const [jobs, setJobs] = React.useState([]);
 	const [text, setText] = React.useState('Communication');
 	const [name, setName] = React.useState('Guest');
+	const [isLoading, setIsLoading] = React.useState(true);
 	const [responseError, setResponseError] = React.useState('');
 
 	React.useEffect(() => {
+		// send message to content script to get name of the current Linkedin profile
 		chrome.tabs.query(
 			{ active: true, currentWindow: true },
 			(tabs: any) => {
@@ -34,6 +37,7 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 					tabs[0].id,
 					{ type: 'get_name' },
 					(response) => {
+						// getting response back and updating state
 						setName(response.name);
 					}
 				);
@@ -41,6 +45,7 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 		);
 	}, []);
 
+	// send ajax request to get back jobs based on Linkedin profile
 	React.useEffect(() => {
 		const baseURL =
 			config.environment === 'prod'
@@ -51,7 +56,7 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 
 		// TODO: verify token later
 		const token = localStorage.getItem('aujwt');
-		console.log('token from jobs page', token);
+
 		Axios.post(
 			URL,
 			{ text },
@@ -63,19 +68,26 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 		)
 			.then(({ data }) => {
 				setJobs(data);
+				setIsLoading(false);
 				console.log('jobs', data);
 			})
 			.catch((e) => {
 				console.log(e);
 				console.log(e.response);
 				setResponseError(e.response.data.message);
+				setIsLoading(false);
 			});
 	}, [text, name]);
 
+	// date formatter
 	const formatDate = (dateStr: string) => {
 		const date = new Date(dateStr);
 		return date.toDateString().substr(4);
 	};
+
+	if (isLoading) {
+		return <Loading isLoading={isLoading} />;
+	}
 
 	return (
 		<Container>
@@ -146,7 +158,7 @@ const Jobs: React.FC<JobsProps> = ({ clientId }) => {
 					)}
 				</TBody>
 			</Table>
-			{jobs.length === 0 && (
+			{!isLoading && jobs.length === 0 && (
 				<div
 					style={{
 						textAlign: 'center',
